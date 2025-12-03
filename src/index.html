@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArsyChat - AI Chat Application</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="icon" type="image/x-icon" href="https://arsynoxhash.dpdns.org/file/BQACAgUAAyEGAAS6vrhKAANZaS_jqaCAc93eN8vSw2FgRmD3A1cAAmQZAAKEhIFVH23W0BCfsec82BA.jpg">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #7c3aed;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #111827;
+            --light: #f9fafb;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Typing indicator */
+        .typing-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: currentColor;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Message bubbles */
+        .message-bubble {
+            max-width: 70%;
+            position: relative;
+        }
+        
+        .user-message .message-bubble {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 20px 20px 0 20px;
+        }
+        
+        .ai-message .message-bubble {
+            background: white;
+            color: var(--dark);
+            border-radius: 20px 20px 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* File upload styling */
+        .file-input-label {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input-label:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Image preview */
+        .image-preview-container {
+            transition: all 0.3s ease;
+        }
+        
+        .image-preview-container:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Modal backdrop */
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-purple-50 min-h-screen">
+    <!-- User Login Modal -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop animate-fade-in">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-4 border-indigo-100">
+                    <img src="https://arsynoxhash.dpdns.org/file/BQACAgUAAyEGAAS6vrhKAANZaS_jqaCAc93eN8vSw2FgRmD3A1cAAmQZAAKEhIFVH23W0BCfsec82BA.jpg" 
+                         alt="ArsyChat Logo" 
+                         class="w-full h-full object-cover"
+                         onerror="this.src='https://ui-avatars.com/api/?name=ArsyChat&background=4f46e5&color=fff&size=128'">
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome to ArsyChat</h2>
+                <p class="text-gray-600">Enter your name to start chatting with AI</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                        Your Name
+                    </label>
+                    <input type="text" 
+                           id="username" 
+                           placeholder="Enter your name"
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
+                           autocomplete="off">
+                </div>
+                
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" id="rememberMe" class="rounded text-indigo-600">
+                    <label for="rememberMe">Remember me</label>
+                </div>
+                
+                <button id="loginBtn" 
+                        class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    Start Chatting
+                </button>
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                <p class="text-sm text-gray-600">
+                    By continuing, you agree to our <a href="#" class="text-indigo-600 hover:underline">Terms</a> and <a href="#" class="text-indigo-600 hover:underline">Privacy Policy</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Container -->
+    <div id="chatContainer" class="hidden min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg sticky top-0 z-40">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-robot text-indigo-600"></i>
+                            </div>
+                            <h1 class="text-xl font-bold">ArsyChat</h1>
+                        </div>
+                        
+                        <div id="userStats" class="hidden md:flex items-center space-x-4 text-sm">
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-comment-alt"></i>
+                                <span id="messageCount">0</span>
+                                <span class="text-indigo-200">messages</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span id="joinDate">Today</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Model Selector -->
+                        <div class="relative">
+                            <select id="modelSelector" 
+                                    class="bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-lg px-3 py-2 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer">
+                                <option value="moonshotai/Kimi-K2-Thinking:novita">Moonshot Kimi K2</option>
+                                <option value="deepseek-ai/DeepSeek-V3.2:novita">DeepSeek V3.2</option>
+                                <option value="meta-llama/Llama-3.3-70B-Instruct:novita">Llama 3.3 70B</option>
+                                <option value="Qwen/Qwen2.5-72B-Instruct:novita">Qwen 2.5 72B</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- User Profile -->
+                        <div id="userProfile" class="flex items-center space-x-3">
+                            <div class="relative group">
+                                <img id="userAvatar" 
+                                     src="https://arsynoxhash.dpdns.org/file/BQACAgUAAyEGAAS6vrhKAANZaS_jqaCAc93eN8vSw2FgRmD3A1cAAmQZAAKEhIFVH23W0BCfsec82BA.jpg"
+                                     alt="User Avatar"
+                                     class="w-10 h-10 rounded-full border-2 border-white object-cover cursor-pointer"
+                                     onerror="this.src='https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&size=80'">
+                                <input type="file" 
+                                       id="avatarUpload" 
+                                       accept="image/*" 
+                                       class="hidden">
+                                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-indigo-600 transition"
+                                     onclick="document.getElementById('avatarUpload').click()">
+                                    <i class="fas fa-camera text-white text-xs"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="hidden md:block">
+                                <div id="userName" class="font-medium"></div>
+                                <button id="logoutBtn" class="text-sm text-indigo-200 hover:text-white transition">
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Chat Area -->
+        <main class="flex-1 container mx-auto px-4 py-6">
+            <!-- Welcome Message -->
+            <div id="welcomeMessage" class="text-center mb-8 animate-fade-in">
+                <div class="inline-block bg-white rounded-2xl p-6 shadow-lg max-w-2xl">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-robot text-2xl text-indigo-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Hello! I'm ArsyChat AI</h2>
+                    <p class="text-gray-600 mb-4">I can help you with questions, conversations, and creative tasks. You can also upload images!</p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">Try asking about AI</span>
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">Upload images (max 10MB)</span>
+                        <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">Switch between AI models</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div id="messagesContainer" class="space-y-6 max-w-4xl mx-auto"></div>
+            
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="hidden text-center py-8">
+                <div class="inline-flex items-center space-x-3 bg-white px-6 py-3 rounded-full shadow">
+                    <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
+                    <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse delay-150"></div>
+                    <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse delay-300"></div>
+                    <span class="text-gray-600 font-medium ml-2">AI is thinking...</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Input Area -->
+        <div class="sticky bottom-0 bg-white border-t border-gray-200 shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <!-- Image Preview -->
+                <div id="imagePreviewContainer" class="hidden mb-4 bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <img id="imagePreview" alt="Image Preview" class="w-16 h-16 object-cover rounded-lg">
+                            <div>
+                                <div id="imageName" class="font-medium text-gray-800"></div>
+                                <div id="imageSize" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        <button onclick="removeImage()" 
+                                class="text-gray-400 hover:text-red-500 transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Input Controls -->
+                <div class="flex items-end space-x-4">
+                    <!-- File Upload -->
+                    <div class="flex-shrink-0">
+                        <label for="fileUpload" 
+                               class="file-input-label flex items-center justify-center w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-xl cursor-pointer transition">
+                            <i class="fas fa-image text-gray-600 text-lg"></i>
+                            <input type="file" 
+                                   id="fileUpload" 
+                                   accept="image/*" 
+                                   class="hidden">
+                        </label>
+                    </div>
+                    
+                    <!-- Text Input -->
+                    <div class="flex-1 relative">
+                        <textarea id="messageInput" 
+                                  placeholder="Type your message here..."
+                                  rows="1"
+                                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none resize-none transition"
+                                  oninput="autoResize(this)"></textarea>
+                        
+                        <div class="absolute right-3 bottom-3 flex items-center space-x-2">
+                            <button id="sendButton" 
+                                    onclick="sendMessage()"
+                                    class="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- File Info -->
+                <div class="mt-3 text-xs text-gray-500 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span>Press Enter to send, Shift+Enter for new line</span>
+                        <span id="charCount" class="text-gray-400">0/2000</span>
+                    </div>
+                    <div>
+                        <span>Max file size: 10MB (JPEG, PNG, GIF, WebP)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-4">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-500 rounded flex items-center justify-center">
+                                <i class="fas fa-robot text-xs"></i>
+                            </div>
+                            <span class="font-bold">ArsyChat</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-1">AI Chat Application with Image Upload</p>
+                    </div>
+                    
+                    <div class="text-center md:text-right">
+                        <p class="text-gray-400 text-sm">
+                            Powered by Hugging Face AI Models
+                        </p>
+                        <p class="text-gray-500 text-xs mt-1">
+                            Default user image from: arsynoxhash.dpdns.org
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        // Configuration
+        const CONFIG = {
+            API_BASE_URL: 'https://arsychat-api.vercel.app/api',
+            DEFAULT_USER_IMAGE: 'https://arsynoxhash.dpdns.org/file/BQACAgUAAyEGAAS6vrhKAANZaS_jqaCAc93eN8vSw2FgRmD3A1cAAmQZAAKEhIFVH23W0BCfsec82BA.jpg',
+            MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+            ALLOWED_FILE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+            MAX_MESSAGE_LENGTH: 2000
+        };
+
+        // State
+        let state = {
+            user: null,
+            messages: [],
+            isLoading: false,
+            uploadedImage: null,
+            selectedModel: 'moonshotai/Kimi-K2-Thinking:novita'
+        };
+
+        // DOM Elements
+        const elements = {
+            loginModal: document.getElementById('loginModal'),
+            chatContainer: document.getElementById('chatContainer'),
+            usernameInput: document.getElementById('username'),
+            loginBtn: document.getElementById('loginBtn'),
+            messageInput: document.getElementById('messageInput'),
+            sendButton: document.getElementById('sendButton'),
+            messagesContainer: document.getElementById('messagesContainer'),
+            welcomeMessage: document.getElementById('welcomeMessage'),
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            fileUpload: document.getElementById('fileUpload'),
+            imagePreviewContainer: document.getElementById('imagePreviewContainer'),
+            imagePreview: document.getElementById('imagePreview'),
+            imageName: document.getElementById('imageName'),
+            imageSize: document.getElementById('imageSize'),
+            userProfile: document.getElementById('userProfile'),
+            userName: document.getElementById('userName'),
+            userAvatar: document.getElementById('userAvatar'),
+            avatarUpload: document.getElementById('avatarUpload'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            modelSelector: document.getElementById('modelSelector'),
+            userStats: document.getElementById('userStats'),
+            messageCount: document.getElementById('messageCount'),
+            joinDate: document.getElementById('joinDate'),
+            charCount: document.getElementById('charCount')
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', init);
+
+        async function init() {
+            // Load user from localStorage
+            const savedUser = localStorage.getItem('arsychat_user');
+            if (savedUser) {
+                try {
+                    state.user = JSON.parse(savedUser);
+                    showChatInterface();
+                    loadUserStats();
+                    await fetchModels();
+                } catch (error) {
+                    console.error('Error loading saved user:', error);
+                    localStorage.removeItem('arsychat_user');
+                    showLoginModal();
+                }
+            } else {
+                showLoginModal();
+            }
+
+            // Set up event listeners
+            setupEventListeners();
+            addWelcomeMessage();
+        }
+
+        function setupEventListeners() {
+            // Login
+            elements.loginBtn.addEventListener('click', handleLogin);
+            elements.usernameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+
+            // Message input
+            elements.messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+                
+                // Update character count
+                setTimeout(() => {
+                    updateCharCount();
+                }, 0);
+            });
+
+            // File upload
+            elements.fileUpload.addEventListener('change', handleFileUpload);
+            
+            // Avatar upload
+            elements.avatarUpload.addEventListener('change', handleAvatarUpload);
+            
+            // Logout
+            elements.logoutBtn.addEventListener('click', handleLogout);
+            
+            // Model selection
+            elements.modelSelector.addEventListener('change', (e) => {
+                state.selectedModel = e.target.value;
+                showToast(`Switched to ${e.target.selectedOptions[0].text}`, 'info');
+            });
+            
+            // Auto-resize textarea
+            elements.messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        }
+
+        function showLoginModal() {
+            elements.loginModal.classList.remove('hidden');
+            elements.chatContainer.classList.add('hidden');
+            elements.usernameInput.focus();
+        }
+
+        function showChatInterface() {
+            elements.loginModal.classList.add('hidden');
+            elements.chatContainer.classList.remove('hidden');
+            elements.userName.textContent = state.user.username;
+            elements.userAvatar.src = state.user.imageUrl || CONFIG.DEFAULT_USER_IMAGE;
+            elements.userProfile.classList.remove('hidden');
+        }
+
+        async function handleLogin() {
+            const username = elements.usernameInput.value.trim();
+            
+            if (!username) {
+                showToast('Please enter your name', 'error');
+                elements.usernameInput.focus();
+                return;
+            }
+
+            try {
+                elements.loginBtn.disabled = true;
+                elements.loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+                // Register/login user
+                const response = await fetch(`${CONFIG.API_BASE_URL}/user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    state.user = data.user;
+                    localStorage.setItem('arsychat_user', JSON.stringify(data.user));
+                    showChatInterface();
+                    showToast(`Welcome, ${username}!`, 'success');
+                    loadUserStats();
+                    await fetchModels();
+                } else {
+                    throw new Error(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Failed to login. Please try again.', 'error');
+            } finally {
+                elements.loginBtn.disabled = false;
+                elements.loginBtn.textContent = 'Start Chatting';
+            }
+        }
+
+        async function handleLogout() {
+            state.user = null;
+            state.messages = [];
+            state.uploadedImage = null;
+            localStorage.removeItem('arsychat_user');
+            showLoginModal();
+            clearMessages();
+            addWelcomeMessage();
+            showToast('Logged out successfully', 'info');
+        }
+
+        async function fetchModels() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/models`);
+                const data = await response.json();
+                
+                if (data.models) {
+                    // Clear existing options
+                    elements.modelSelector.innerHTML = '';
+                    
+                    // Add new options
+                    data.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.id;
+                        option.textContent = model.name;
+                        elements.modelSelector.appendChild(option);
+                    });
+                    
+                    // Set default model
+                    elements.modelSelector.value = state.selectedModel;
+                }
+            } catch (error) {
+                console.error('Error fetching models:', error);
+            }
+        }
+
+        async function loadUserStats() {
+            if (!state.user?.id) return;
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/user/${state.user.id}/stats`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    elements.messageCount.textContent = data.stats.messageCount;
+                    elements.joinDate.textContent = formatDate(data.stats.joined);
+                    elements.userStats.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!CONFIG.ALLOWED_FILE_TYPES.includes(file.type)) {
+                showToast('Please select a valid image file (JPEG, PNG, GIF, WebP)', 'error');
+                return;
+            }
+
+            // Validate file size
+            if (file.size > CONFIG.MAX_FILE_SIZE) {
+                showToast('File size too large. Maximum size is 10MB', 'error');
+                return;
+            }
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                state.uploadedImage = {
+                    file: file,
+                    dataUrl: e.target.result
+                };
+                
+                // Show preview
+                elements.imagePreview.src = e.target.result;
+                elements.imageName.textContent = file.name;
+                elements.imageSize.textContent = formatBytes(file.size);
+                elements.imagePreviewContainer.classList.remove('hidden');
+                
+                showToast('Image ready to send', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!CONFIG.ALLOWED_FILE_TYPES.includes(file.type)) {
+                showToast('Please select a valid image file', 'error');
+                return;
+            }
+
+            // Validate file size
+            if (file.size > CONFIG.MAX_FILE_SIZE) {
+                showToast('File size too large. Maximum size is 10MB', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    // Update local avatar
+                    elements.userAvatar.src = e.target.result;
+                    
+                    // Upload to server
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    formData.append('userId', state.user.id);
+
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/user/image`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        state.user = data.user;
+                        localStorage.setItem('arsychat_user', JSON.stringify(data.user));
+                        showToast('Profile image updated successfully', 'success');
+                    } else {
+                        throw new Error(data.error || 'Upload failed');
+                    }
+                } catch (error) {
+                    console.error('Avatar upload error:', error);
+                    showToast('Failed to update profile image', 'error');
+                    // Revert to default
+                    elements.userAvatar.src = CONFIG.DEFAULT_USER_IMAGE;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            state.uploadedImage = null;
+            elements.imagePreviewContainer.classList.add('hidden');
+            elements.fileUpload.value = '';
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function updateCharCount() {
+            const length = elements.messageInput.value.length;
+            elements.charCount.textContent = `${length}/${CONFIG.MAX_MESSAGE_LENGTH}`;
+            
+            if (length > CONFIG.MAX_MESSAGE_LENGTH * 0.9) {
+                elements.charCount.classList.add('text-red-500');
+            } else {
+                elements.charCount.classList.remove('text-red-500');
+            }
+        }
+
+        async function sendMessage() {
+            const message = elements.messageInput.value.trim();
+            
+            if (!message && !state.uploadedImage) {
+                showToast('Please enter a message or attach an image', 'warning');
+                return;
+            }
+
+            if (message.length > CONFIG.MAX_MESSAGE_LENGTH) {
+                showToast(`Message too long. Maximum ${CONFIG.MAX_MESSAGE_LENGTH} characters`, 'error');
+                return;
+            }
+
+            // Disable input
+            state.isLoading = true;
+            elements.messageInput.disabled = true;
+            elements.sendButton.disabled = true;
+            elements.fileUpload.disabled = true;
+            
+            // Show loading indicator
+            elements.loadingIndicator.classList.remove('hidden');
+            
+            // Add user message to UI
+            addMessage(message, 'user', state.uploadedImage?.dataUrl);
+            
+            // Clear input
+            elements.messageInput.value = '';
+            elements.messageInput.style.height = 'auto';
+            updateCharCount();
+            
+            try {
+                let imageUrl = null;
+                
+                // Upload image if exists
+                if (state.uploadedImage) {
+                    const formData = new FormData();
+                    formData.append('image', state.uploadedImage.file);
+                    
+                    const uploadResponse = await fetch(`${CONFIG.API_BASE_URL}/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const uploadData = await uploadResponse.json();
+                    
+                    if (uploadData.success) {
+                        imageUrl = uploadData.imageUrl;
+                    }
+                }
+                
+                // Prepare messages for API
+                const apiMessages = state.messages.map(msg => ({
+                    role: msg.role,
+                    content: msg.content
+                }));
+                
+                // Add current message
+                apiMessages.push({
+                    role: 'user',
+                    content: imageUrl ? `${message}\n\n[Image attached]` : message
+                });
+                
+                // Send to chat API
+                const chatResponse = await fetch(`${CONFIG.API_BASE_URL}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: apiMessages,
+                        model: state.selectedModel,
+                        userId: state.user?.id
+                    })
+                });
+                
+                const chatData = await chatResponse.json();
+                
+                if (chatData.response) {
+                    // Add AI response
+                    addMessage(chatData.response.content, 'assistant');
+                    
+                    // Update message count
+                    if (state.user?.id) {
+                        loadUserStats();
+                    }
+                } else {
+                    throw new Error(chatData.error || 'No response from AI');
+                }
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                addMessage(`Sorry, I encountered an error: ${error.message}`, 'assistant');
+                showToast('Failed to get response. Please try again.', 'error');
+            } finally {
+                // Re-enable input
+                state.isLoading = false;
+                elements.messageInput.disabled = false;
+                elements.sendButton.disabled = false;
+                elements.fileUpload.disabled = false;
+                elements.loadingIndicator.classList.add('hidden');
+                
+                // Clear uploaded image
+                removeImage();
+                
+                // Focus input
+                elements.messageInput.focus();
+            }
+        }
+
+        function addMessage(content, role, imageUrl = null) {
+            // Hide welcome message after first user message
+            if (role === 'user') {
+                elements.welcomeMessage.classList.add('hidden');
+            }
+            
+            // Add to state
+            state.messages.push({ role, content, timestamp: new Date() });
+            
+            // Create message element
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex items-start space-x-3 animate-fade-in ${role === 'user' ? 'user-message justify-end' : 'ai-message'}`;
+            
+            // Avatar
+            const avatar = document.createElement('div');
+            avatar.className = `flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${role === 'user' ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : 'bg-gray-200'}`;
+            
+            if (role === 'user') {
+                avatar.innerHTML = `<img src="${state.user?.imageUrl || CONFIG.DEFAULT_USER_IMAGE}" alt="User" class="w-full h-full rounded-full object-cover" onerror="this.parentElement.innerHTML='<i class=\"fas fa-user text-white text-sm\"></i>'">`;
+            } else {
+                avatar.innerHTML = '<i class="fas fa-robot text-gray-600"></i>';
+            }
+            
+            // Message bubble
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble p-4';
+            
+            // Role label
+            const roleLabel = document.createElement('div');
+            roleLabel.className = `text-xs font-medium mb-1 ${role === 'user' ? 'text-indigo-200' : 'text-gray-500'}`;
+            roleLabel.textContent = role === 'user' ? (state.user?.username || 'You') : 'ArsyChat AI';
+            
+            // Content
+            const contentDiv = document.createElement('div');
+            contentDiv.className = role === 'user' ? 'text-white' : 'text-gray-800';
+            
+            if (imageUrl && role === 'user') {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = 'Uploaded image';
+                img.className = 'max-w-xs rounded-lg mb-2';
+                contentDiv.appendChild(img);
+            }
+            
+            const text = document.createElement('p');
+            text.className = 'whitespace-pre-wrap';
+            text.textContent = content;
+            contentDiv.appendChild(text);
+            
+            // Time
+            const timeDiv = document.createElement('div');
+            timeDiv.className = `text-xs mt-2 ${role === 'user' ? 'text-indigo-200' : 'text-gray-500'}`;
+            timeDiv.textContent = formatTime(new Date());
+            
+            // Assemble bubble
+            bubble.appendChild(roleLabel);
+            bubble.appendChild(contentDiv);
+            bubble.appendChild(timeDiv);
+            
+            // Assemble message
+            if (role === 'user') {
+                messageDiv.appendChild(bubble);
+                messageDiv.appendChild(avatar);
+            } else {
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(bubble);
+            }
+            
+            // Add to container
+            elements.messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            setTimeout(() => {
+                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        }
+
+        function addWelcomeMessage() {
+            const welcomeMsg = "Hello! I'm ArsyChat AI. I can help you with questions, conversations, and creative tasks. You can upload images by clicking the image icon below. Try asking me anything!";
+            addMessage(welcomeMsg, 'assistant');
+        }
+
+        function clearMessages() {
+            elements.messagesContainer.innerHTML = '';
+            elements.welcomeMessage.classList.remove('hidden');
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: colors[type] || colors.info,
+                stopOnFocus: true
+            }).showToast();
+        }
+    </script>
+</body>
+</html>
