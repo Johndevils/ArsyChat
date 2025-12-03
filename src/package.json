@@ -1,0 +1,13 @@
+{
+  "name": "ArsyChat",
+  "version": "1.0.0",
+  "description": "ArsyChat AI Chat Application",
+  "main": "src/index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "build": "echo 'No build step required for static site'",
+    "test": "echo 'No tests specified'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
