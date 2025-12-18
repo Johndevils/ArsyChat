@@ -1,728 +1,225 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArsyChat - AI Chat Application</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <link rel="icon" type="image/x-icon" href="https://arsynoxhash.dpdns.org/file/BQACAgUAAyEGAAS6vrhKAANZaS_jqaCAc93eN8vSw2FgRmD3A1cAAmQZAAKEhIFVH23W0BCfsec82BA.jpg">
+    <title>Arsychat Ai - Multi-Model Engine</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js for rendering markdown responses -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-dark: #4338ca;
-            --secondary: #7c3aed;
-            --accent: #f59e0b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --dark: #111827;
-            --light: #f9fafb;
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        
-        /* Typing indicator */
-        .typing-dots {
-            display: inline-flex;
-            gap: 2px;
-        }
-        
-        .typing-dot {
-            width: 6px;
-            height: 6px;
-            background-color: currentColor;
-            border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out both;
-        }
-        
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes typing {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-        
-        /* Gradient text */
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Message bubbles */
-        .message-bubble {
-            max-width: 70%;
-            position: relative;
-        }
-        
-        .user-message .message-bubble {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            border-radius: 20px 20px 0 20px;
-        }
-        
-        .ai-message .message-bubble {
-            background: white;
-            color: var(--dark);
-            border-radius: 20px 20px 20px 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* File upload styling */
-        .file-input-label {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .file-input-label:hover {
-            transform: translateY(-2px);
-        }
-        
-        /* Image preview */
-        .image-preview-container {
-            transition: all 0.3s ease;
-        }
-        
-        .image-preview-container:hover {
-            transform: scale(1.02);
-        }
-        
-        /* Loading spinner */
-        .spinner {
-            border-top-color: var(--primary);
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .message-bubble {
-                max-width: 85%;
-            }
-        }
-        
-        /* Chat container height */
-        .chat-container {
-            height: calc(100vh - 200px);
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .loader-dot { animation: pulse 1.5s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+        .response-area pre { background: #020617; padding: 1rem; border-radius: 0.75rem; margin: 0.75rem 0; overflow-x: auto; font-family: monospace; border: 1px solid rgba(255,255,255,0.05); }
+        .response-area code { font-size: 0.85rem; color: #94a3b8; }
+        .response-area p { margin-bottom: 1rem; line-height: 1.6; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-50 to-purple-50 min-h-screen">
-    <!-- Main Chat Container -->
-    <div id="chatContainer" class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg sticky top-0 z-40">
-            <div class="container mx-auto px-4 py-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                                <i class="fas fa-robot text-indigo-600 text-xl"></i>
-                            </div>
-                            <div>
-                                <h1 class="text-xl font-bold">ArsyChat</h1>
-                                <p class="text-indigo-200 text-sm">No login required • Start chatting instantly</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <!-- Model Selector -->
-                        <div class="relative">
-                            <select id="modelSelector" 
-                                    class="bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-lg px-3 py-2 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer">
-                                <option value="moonshotai/Kimi-K2-Thinking:novita">Moonshot Kimi K2</option>
-                                <option value="deepseek-ai/DeepSeek-V3.2:novita">DeepSeek V3.2</option>
-                                <option value="meta-llama/Llama-3.3-70B-Instruct:novita">Llama 3.3 70B</option>
-                                <option value="Qwen/Qwen2.5-72B-Instruct:novita">Qwen 2.5 72B</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        
-                        <!-- User Info -->
-                        <div class="flex items-center space-x-3">
-                            <div class="relative">
-                                <img id="userAvatar" 
-                                     src="https://arsynoxhash.dpdns.org/file/BQACAgUAAyEGAAS6vrhKAANZaS_jqaCAc93eN8vSw2FgRmD3A1cAAmQZAAKEhIFVH23W0BCfsec82BA.jpg"
-                                     alt="User"
-                                     class="w-10 h-10 rounded-full border-2 border-white object-cover"
-                                     onerror="this.src='https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&size=80'">
-                            </div>
-                            <div class="hidden md:block">
-                                <div class="font-medium">Guest User</div>
-                                <div class="text-sm text-indigo-200">Ready to chat</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+<body class="bg-[#020617] text-slate-300 h-screen flex flex-col overflow-hidden">
 
-        <!-- Main Chat Area -->
-        <main class="flex-1 container mx-auto px-4 py-6">
-            <!-- Welcome Message -->
-            <div id="welcomeMessage" class="text-center mb-8 animate-fade-in">
-                <div class="inline-block bg-white rounded-2xl p-6 shadow-lg max-w-2xl">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-robot text-2xl text-indigo-600"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome to ArsyChat! 🎉</h2>
-                    <p class="text-gray-600 mb-4">Start chatting instantly with our AI assistant. No login required!</p>
-                    <div class="flex flex-wrap justify-center gap-2">
-                        <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">Ask me anything</span>
-                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">Upload images (max 10MB)</span>
-                        <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">Try different AI models</span>
-                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">No account needed</span>
-                    </div>
-                </div>
+    <!-- Header -->
+    <header class="p-4 border-b border-white/5 flex justify-between items-center glass z-50">
+        <div class="flex items-center gap-3">
+            <div class="h-9 w-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                <span class="text-white font-bold text-lg">A</span>
             </div>
-
-            <!-- Messages Container -->
-            <div id="messagesContainer" class="space-y-6 max-w-4xl mx-auto chat-container overflow-y-auto"></div>
-            
-            <!-- Loading Indicator -->
-            <div id="loadingIndicator" class="hidden text-center py-8">
-                <div class="inline-flex items-center space-x-3 bg-white px-6 py-3 rounded-full shadow">
-                    <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
-                    <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse delay-150"></div>
-                    <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse delay-300"></div>
-                    <span class="text-gray-600 font-medium ml-2">AI is thinking...</span>
-                </div>
-            </div>
-        </main>
-
-        <!-- Input Area -->
-        <div class="sticky bottom-0 bg-white border-t border-gray-200 shadow-lg">
-            <div class="container mx-auto px-4 py-4">
-                <!-- Image Preview -->
-                <div id="imagePreviewContainer" class="hidden mb-4 bg-gray-50 rounded-xl p-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <img id="imagePreview" alt="Image Preview" class="w-16 h-16 object-cover rounded-lg">
-                            <div>
-                                <div id="imageName" class="font-medium text-gray-800"></div>
-                                <div id="imageSize" class="text-sm text-gray-600"></div>
-                            </div>
-                        </div>
-                        <button onclick="removeImage()" 
-                                class="text-gray-400 hover:text-red-500 transition">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Input Controls -->
-                <div class="flex items-end space-x-4">
-                    <!-- File Upload -->
-                    <div class="flex-shrink-0">
-                        <label for="fileUpload" 
-                               class="file-input-label flex items-center justify-center w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-xl cursor-pointer transition">
-                            <i class="fas fa-image text-gray-600 text-lg"></i>
-                            <input type="file" 
-                                   id="fileUpload" 
-                                   accept="image/*" 
-                                   class="hidden">
-                        </label>
-                    </div>
-                    
-                    <!-- Text Input -->
-                    <div class="flex-1 relative">
-                        <textarea id="messageInput" 
-                                  placeholder="Type your message here... (Press Enter to send)"
-                                  rows="1"
-                                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none resize-none transition"
-                                  oninput="autoResize(this)"></textarea>
-                        
-                        <div class="absolute right-3 bottom-3 flex items-center space-x-2">
-                            <button id="sendButton" 
-                                    onclick="sendMessage()"
-                                    class="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- File Info -->
-                <div class="mt-3 text-xs text-gray-500 flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <span>Press Enter to send • Shift+Enter for new line</span>
-                        <span id="charCount" class="text-gray-400">0/2000</span>
-                    </div>
-                    <div>
-                        <span>Max file size: 10MB (JPEG, PNG, GIF, WebP)</span>
-                    </div>
-                </div>
-            </div>
+            <h1 class="text-lg font-bold tracking-tight text-white">Arsychat <span class="text-cyan-400">Ai</span></h1>
         </div>
+        <div class="flex gap-2">
+            <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400 border border-white/10">Parallel v1.0</span>
+        </div>
+    </header>
 
-        <!-- Footer -->
-        <footer class="bg-gray-900 text-white py-4">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="mb-4 md:mb-0">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-500 rounded flex items-center justify-center">
-                                <i class="fas fa-robot text-xs"></i>
-                            </div>
-                            <span class="font-bold">ArsyChat</span>
-                        </div>
-                        <p class="text-gray-400 text-sm mt-1">AI Chat Application • No Login Required</p>
-                    </div>
-                    
-                    <div class="text-center md:text-right">
-                        <p class="text-gray-400 text-sm">
-                            Powered by Hugging Face AI Models
-                        </p>
-                        <p class="text-gray-500 text-xs mt-1">
-                            Start chatting instantly • User image from: arsynoxhash.dpdns.org
-                        </p>
-                    </div>
+    <!-- Compare Dashboard -->
+    <main class="flex-1 overflow-hidden p-3 md:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="main-grid">
+        
+        <!-- GLM Card -->
+        <section class="glass rounded-2xl flex flex-col border-cyan-500/20 shadow-xl overflow-hidden group">
+            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.6)]"></div>
+                    <span class="text-xs font-bold uppercase text-slate-200">GLM-4</span>
                 </div>
+                <div id="status-glm" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
             </div>
-        </footer>
+            <div id="output-glm" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
+                <p class="text-slate-500 italic">Waiting for prompt...</p>
+            </div>
+        </section>
+
+        <!-- Kimi Card -->
+        <section class="glass rounded-2xl flex flex-col border-emerald-500/20 shadow-xl overflow-hidden group">
+            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+                    <span class="text-xs font-bold uppercase text-slate-200">KIMI</span>
+                </div>
+                <div id="status-kimi" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
+            </div>
+            <div id="output-kimi" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
+                <p class="text-slate-500 italic">Aapka prompt yahan dikhega...</p>
+            </div>
+        </section>
+
+        <!-- DeepSeek Card -->
+        <section class="glass rounded-2xl flex flex-col border-blue-500/20 shadow-xl overflow-hidden group">
+            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+                    <span class="text-xs font-bold uppercase text-slate-200">DeepSeek</span>
+                </div>
+                <div id="status-deepseek" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-blue-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-blue-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
+            </div>
+            <div id="output-deepseek" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
+                <p class="text-slate-500 italic">Standing by...</p>
+            </div>
+        </section>
+
+        <!-- Qwen Card -->
+        <section class="glass rounded-2xl flex flex-col border-violet-500/20 shadow-xl overflow-hidden group">
+            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
+                    <span class="text-xs font-bold uppercase text-slate-200">Qwen</span>
+                </div>
+                <div id="status-qwen" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-violet-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-violet-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-violet-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
+            </div>
+            <div id="output-qwen" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
+                <p class="text-slate-500 italic">Ready for analysis...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Input -->
+    <div class="p-6 bg-gradient-to-t from-[#020617] via-[#020617]/90 to-transparent">
+        <div class="max-w-4xl mx-auto relative">
+            <form id="ai-form" class="relative group">
+                <textarea 
+                    id="user-input"
+                    rows="1"
+                    placeholder="Enter your query to compare 4 models simultaneously..."
+                    class="w-full bg-slate-900/80 border border-white/10 rounded-2xl py-5 pl-6 pr-16 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all resize-none shadow-2xl custom-scrollbar"
+                ></textarea>
+                <button 
+                    type="submit"
+                    id="send-btn"
+                    class="absolute right-3 top-3 bottom-3 px-5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl transition-all font-medium flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed group-hover:scale-105 active:scale-95 shadow-lg shadow-cyan-600/20"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
+            </form>
+            <p class="text-[10px] text-center mt-3 text-slate-500 font-medium uppercase tracking-[0.2em]">Powered by Arsychat API Framework</p>
+        </div>
     </div>
 
-    <!-- JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        // Configuration
-        const CONFIG = {
-            API_BASE_URL: 'https://your-vercel-app.vercel.app/api',
-            DEFAULT_USER_IMAGE: 'https://arsynoxhash.dpdns.org/file/BQACAgUAAyEGAAS6vrhKAANZaS_jqaCAc93eN8vSw2FgRmD3A1cAAmQZAAKEhIFVH23W0BCfsec82BA.jpg',
-            MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-            ALLOWED_FILE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
-            MAX_MESSAGE_LENGTH: 2000
+        const API_BASE = "https://arsychat-api.metaspace.workers.dev/api";
+        const ENDPOINTS = {
+            glm: `${API_BASE}/glm/v1/chat/completions`,
+            kimi: `${API_BASE}/kimi/v1/chat/completions`,
+            deepseek: `${API_BASE}/deepseek/v1/chat/completions`,
+            qwen: `${API_BASE}/qwen/v1/chat/completions`
         };
 
-        // State
-        let state = {
-            messages: [],
-            isLoading: false,
-            uploadedImage: null,
-            selectedModel: 'moonshotai/Kimi-K2-Thinking:novita',
-            username: 'You'
-        };
+        const form = document.getElementById('ai-form');
+        const input = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
 
-        // DOM Elements
-        const elements = {
-            messageInput: document.getElementById('messageInput'),
-            sendButton: document.getElementById('sendButton'),
-            messagesContainer: document.getElementById('messagesContainer'),
-            welcomeMessage: document.getElementById('welcomeMessage'),
-            loadingIndicator: document.getElementById('loadingIndicator'),
-            fileUpload: document.getElementById('fileUpload'),
-            imagePreviewContainer: document.getElementById('imagePreviewContainer'),
-            imagePreview: document.getElementById('imagePreview'),
-            imageName: document.getElementById('imageName'),
-            imageSize: document.getElementById('imageSize'),
-            modelSelector: document.getElementById('modelSelector'),
-            charCount: document.getElementById('charCount'),
-            userAvatar: document.getElementById('userAvatar')
-        };
+        // Auto-resize textarea
+        input.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', init);
+        // Main prompt handler
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prompt = input.value.trim();
+            if (!prompt) return;
 
-        async function init() {
-            // Set up event listeners
-            setupEventListeners();
+            // Prepare UI
+            input.value = '';
+            input.style.height = 'auto';
+            sendBtn.disabled = true;
+
+            const models = ['glm', 'kimi', 'deepseek', 'qwen'];
             
-            // Add welcome message
-            addWelcomeMessage();
-            
-            // Fetch available models
-            await fetchModels();
-            
-            // Focus on input
-            setTimeout(() => {
-                elements.messageInput.focus();
-            }, 500);
-        }
-
-        function setupEventListeners() {
-            // Message input
-            elements.messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-                
-                // Update character count
-                setTimeout(() => {
-                    updateCharCount();
-                }, 0);
+            models.forEach(id => {
+                document.getElementById(`status-${id}`).classList.remove('hidden');
+                document.getElementById(`output-${id}`).innerHTML = `<div class="animate-pulse flex space-y-3 flex-col">
+                    <div class="h-2 bg-white/10 rounded w-3/4"></div>
+                    <div class="h-2 bg-white/10 rounded"></div>
+                    <div class="h-2 bg-white/10 rounded w-5/6"></div>
+                </div>`;
             });
 
-            // File upload
-            elements.fileUpload.addEventListener('change', handleFileUpload);
-            
-            // Model selection
-            elements.modelSelector.addEventListener('change', (e) => {
-                state.selectedModel = e.target.value;
-                showToast(`Switched to ${e.target.selectedOptions[0].text}`, 'info');
+            // Parallel calls
+            models.forEach(modelId => {
+                fetchModel(modelId, prompt);
             });
-            
-            // Auto-resize textarea
-            elements.messageInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-        }
+        });
 
-        async function fetchModels() {
+        async function fetchModel(id, prompt) {
+            const outputDiv = document.getElementById(`output-${id}`);
+            const statusDiv = document.getElementById(`status-${id}`);
+
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/models`);
+                const response = await fetch(`${ENDPOINTS[id]}?prompt=${encodeURIComponent(prompt)}`);
+                
+                if (!response.ok) throw new Error(`Status: ${response.status}`);
+                
                 const data = await response.json();
                 
-                if (data.models) {
-                    // Clear existing options
-                    elements.modelSelector.innerHTML = '';
-                    
-                    // Add new options
-                    data.models.forEach(model => {
-                        const option = document.createElement('option');
-                        option.value = model.id;
-                        option.textContent = model.name;
-                        elements.modelSelector.appendChild(option);
-                    });
-                    
-                    // Set default model
-                    elements.modelSelector.value = state.selectedModel;
-                }
-            } catch (error) {
-                console.error('Error fetching models:', error);
-                showToast('Failed to load AI models', 'error');
-            }
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Validate file type
-            if (!CONFIG.ALLOWED_FILE_TYPES.includes(file.type)) {
-                showToast('Please select a valid image file (JPEG, PNG, GIF, WebP)', 'error');
-                return;
-            }
-
-            // Validate file size
-            if (file.size > CONFIG.MAX_FILE_SIZE) {
-                showToast('File size too large. Maximum size is 10MB', 'error');
-                return;
-            }
-
-            // Create preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                state.uploadedImage = {
-                    file: file,
-                    dataUrl: e.target.result
-                };
-                
-                // Show preview
-                elements.imagePreview.src = e.target.result;
-                elements.imageName.textContent = file.name;
-                elements.imageSize.textContent = formatBytes(file.size);
-                elements.imagePreviewContainer.classList.remove('hidden');
-                
-                showToast('Image ready to send', 'success');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function removeImage() {
-            state.uploadedImage = null;
-            elements.imagePreviewContainer.classList.add('hidden');
-            elements.fileUpload.value = '';
-        }
-
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-        }
-
-        function updateCharCount() {
-            const length = elements.messageInput.value.length;
-            elements.charCount.textContent = `${length}/${CONFIG.MAX_MESSAGE_LENGTH}`;
-            
-            if (length > CONFIG.MAX_MESSAGE_LENGTH * 0.9) {
-                elements.charCount.classList.add('text-red-500');
-            } else {
-                elements.charCount.classList.remove('text-red-500');
-            }
-        }
-
-        async function sendMessage() {
-            const message = elements.messageInput.value.trim();
-            
-            if (!message && !state.uploadedImage) {
-                showToast('Please enter a message or attach an image', 'warning');
-                return;
-            }
-
-            if (message.length > CONFIG.MAX_MESSAGE_LENGTH) {
-                showToast(`Message too long. Maximum ${CONFIG.MAX_MESSAGE_LENGTH} characters`, 'error');
-                return;
-            }
-
-            // Disable input
-            state.isLoading = true;
-            elements.messageInput.disabled = true;
-            elements.sendButton.disabled = true;
-            elements.fileUpload.disabled = true;
-            
-            // Show loading indicator
-            elements.loadingIndicator.classList.remove('hidden');
-            
-            // Add user message to UI
-            addMessage(message, 'user', state.uploadedImage?.dataUrl);
-            
-            // Clear input
-            elements.messageInput.value = '';
-            elements.messageInput.style.height = 'auto';
-            updateCharCount();
-            
-            try {
-                let imageUrl = null;
-                
-                // Upload image if exists
-                if (state.uploadedImage) {
-                    const formData = new FormData();
-                    formData.append('image', state.uploadedImage.file);
-                    
-                    const uploadResponse = await fetch(`${CONFIG.API_BASE_URL}/upload`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const uploadData = await uploadResponse.json();
-                    
-                    if (uploadData.success) {
-                        imageUrl = uploadData.imageUrl;
-                    }
-                }
-                
-                // Prepare messages for API
-                const apiMessages = state.messages.map(msg => ({
-                    role: msg.role,
-                    content: msg.content
-                }));
-                
-                // Add current message
-                apiMessages.push({
-                    role: 'user',
-                    content: imageUrl ? `${message}\n\n[Image attached]` : message
-                });
-                
-                // Send to chat API
-                const chatResponse = await fetch(`${CONFIG.API_BASE_URL}/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        messages: apiMessages,
-                        model: state.selectedModel
-                    })
-                });
-                
-                const chatData = await chatResponse.json();
-                
-                if (chatData.response) {
-                    // Add AI response
-                    addMessage(chatData.response.content, 'assistant');
+                // Content Extraction (Handles multiple API response formats)
+                let text = "";
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    text = data.choices[0].message.content;
+                } else if (data.response) {
+                    text = data.response;
+                } else if (data.result) {
+                    text = data.result;
                 } else {
-                    throw new Error(chatData.error || 'No response from AI');
+                    text = typeof data === 'string' ? data : JSON.stringify(data);
                 }
+
+                outputDiv.innerHTML = marked.parse(text);
                 
-            } catch (error) {
-                console.error('Chat error:', error);
-                addMessage(`Sorry, I encountered an error: ${error.message}`, 'assistant');
-                showToast('Failed to get response. Please try again.', 'error');
+            } catch (err) {
+                outputDiv.innerHTML = `<div class="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-red-400 text-xs">
+                    Failed to fetch response.<br>${err.message}
+                </div>`;
             } finally {
-                // Re-enable input
-                state.isLoading = false;
-                elements.messageInput.disabled = false;
-                elements.sendButton.disabled = false;
-                elements.fileUpload.disabled = false;
-                elements.loadingIndicator.classList.add('hidden');
-                
-                // Clear uploaded image
-                removeImage();
-                
-                // Focus input
-                elements.messageInput.focus();
+                statusDiv.classList.add('hidden');
+                checkAllFinished();
             }
         }
 
-        function addMessage(content, role, imageUrl = null) {
-            // Hide welcome message after first user message
-            if (role === 'user') {
-                elements.welcomeMessage.classList.add('hidden');
-            }
-            
-            // Add to state
-            state.messages.push({ role, content, timestamp: new Date() });
-            
-            // Create message element
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `flex items-start space-x-3 animate-fade-in ${role === 'user' ? 'user-message justify-end' : 'ai-message'}`;
-            
-            // Avatar
-            const avatar = document.createElement('div');
-            avatar.className = `flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${role === 'user' ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : 'bg-gray-200'}`;
-            
-            if (role === 'user') {
-                avatar.innerHTML = `<img src="${CONFIG.DEFAULT_USER_IMAGE}" alt="User" class="w-full h-full rounded-full object-cover" onerror="this.parentElement.innerHTML='<i class=\"fas fa-user text-white text-sm\"></i>'">`;
-            } else {
-                avatar.innerHTML = '<i class="fas fa-robot text-gray-600"></i>';
-            }
-            
-            // Message bubble
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble p-4';
-            
-            // Role label
-            const roleLabel = document.createElement('div');
-            roleLabel.className = `text-xs font-medium mb-1 ${role === 'user' ? 'text-indigo-200' : 'text-gray-500'}`;
-            roleLabel.textContent = role === 'user' ? state.username : 'ArsyChat AI';
-            
-            // Content
-            const contentDiv = document.createElement('div');
-            contentDiv.className = role === 'user' ? 'text-white' : 'text-gray-800';
-            
-            if (imageUrl && role === 'user') {
-                const img = document.createElement('img');
-                img.src = imageUrl;
-                img.alt = 'Uploaded image';
-                img.className = 'max-w-xs rounded-lg mb-2';
-                contentDiv.appendChild(img);
-            }
-            
-            const text = document.createElement('p');
-            text.className = 'whitespace-pre-wrap';
-            text.textContent = content;
-            contentDiv.appendChild(text);
-            
-            // Time
-            const timeDiv = document.createElement('div');
-            timeDiv.className = `text-xs mt-2 ${role === 'user' ? 'text-indigo-200' : 'text-gray-500'}`;
-            timeDiv.textContent = formatTime(new Date());
-            
-            // Assemble bubble
-            bubble.appendChild(roleLabel);
-            bubble.appendChild(contentDiv);
-            bubble.appendChild(timeDiv);
-            
-            // Assemble message
-            if (role === 'user') {
-                messageDiv.appendChild(bubble);
-                messageDiv.appendChild(avatar);
-            } else {
-                messageDiv.appendChild(avatar);
-                messageDiv.appendChild(bubble);
-            }
-            
-            // Add to container
-            elements.messagesContainer.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            setTimeout(() => {
-                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 100);
+        function checkAllFinished() {
+            const allHidden = Array.from(document.querySelectorAll('[id^="status-"]'))
+                                   .every(el => el.classList.contains('hidden'));
+            if (allHidden) sendBtn.disabled = false;
         }
 
-        function addWelcomeMessage() {
-            const welcomeMsg = "Hello! I'm ArsyChat AI. I can help you with questions, conversations, and creative tasks. You can upload images by clicking the image icon below. Try asking me anything!";
-            addMessage(welcomeMsg, 'assistant');
-        }
+        // Enter key to submit
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
 
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function formatTime(date) {
-            return date.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true 
-            });
-        }
-
-        function showToast(message, type = 'info') {
-            const colors = {
-                success: '#10b981',
-                error: '#ef4444',
-                warning: '#f59e0b',
-                info: '#3b82f6'
-            };
-            
-            Toastify({
-                text: message,
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: colors[type] || colors.info,
-                stopOnFocus: true
-            }).showToast();
-        }
+        // Initialize marked options
+        marked.setOptions({ gfm: true, breaks: true });
     </script>
 </body>
 </html>
