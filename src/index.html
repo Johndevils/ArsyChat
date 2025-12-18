@@ -3,223 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arsychat Ai - Multi-Model Engine</title>
-    <!-- Tailwind CSS for modern styling -->
+    <title>Arsychat Ai | Parallel Multi-Model</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Marked.js for rendering markdown responses -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #f4f4f5; }
+        .glass-panel { background: rgba(24, 24, 27, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; }
+        .glass-panel:hover { border-color: rgba(255, 255, 255, 0.2); }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
-        .loader-dot { animation: pulse 1.5s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
-        .response-area pre { background: #020617; padding: 1rem; border-radius: 0.75rem; margin: 0.75rem 0; overflow-x: auto; font-family: monospace; border: 1px solid rgba(255,255,255,0.05); }
-        .response-area code { font-size: 0.85rem; color: #94a3b8; }
-        .response-area p { margin-bottom: 1rem; line-height: 1.6; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        .markdown-content h1, .markdown-content h2 { font-weight: bold; margin-bottom: 0.5rem; color: #fff; }
+        .markdown-content p { margin-bottom: 0.75rem; line-height: 1.6; font-size: 0.95rem; }
+        .markdown-content code { background: #27272a; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+        .markdown-content pre { background: #18181b; padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; border: 1px solid #3f3f46; }
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .loading-skeleton { animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
 </head>
-<body class="bg-[#020617] text-slate-300 h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="p-4 border-b border-white/5 flex justify-between items-center glass z-50">
+    <header class="h-16 flex items-center justify-between px-6 border-b border-white/10 glass-panel z-20">
         <div class="flex items-center gap-3">
-            <div class="h-9 w-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                <span class="text-white font-bold text-lg">A</span>
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <span class="font-bold text-white text-lg italic">A</span>
             </div>
-            <h1 class="text-lg font-bold tracking-tight text-white">Arsychat <span class="text-cyan-400">Ai</span></h1>
+            <h1 class="text-xl font-bold tracking-tight">Arsychat <span class="text-blue-500">Ai</span></h1>
         </div>
-        <div class="flex gap-2">
-            <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400 border border-white/10">Parallel v1.0</span>
+        <div class="flex items-center gap-4 text-xs font-semibold uppercase tracking-widest text-zinc-500">
+            <span class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span> Comparison Engine</span>
         </div>
     </header>
 
-    <!-- Compare Dashboard -->
-    <main class="flex-1 overflow-hidden p-3 md:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="main-grid">
+    <!-- Main Comparison Grid -->
+    <main class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 p-4 gap-4" id="view-port">
         
-        <!-- GLM Card -->
-        <section class="glass rounded-2xl flex flex-col border-cyan-500/20 shadow-xl overflow-hidden group">
-            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.6)]"></div>
-                    <span class="text-xs font-bold uppercase text-slate-200">GLM-4</span>
-                </div>
-                <div id="status-glm" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
+        <!-- Model: GLM -->
+        <section class="glass-panel rounded-2xl flex flex-col overflow-hidden">
+            <div class="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-xs font-bold text-blue-400 tracking-wider uppercase">GLM-4 (Open)</h2>
+                <div id="loader-glm" class="hidden"><div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div></div>
             </div>
-            <div id="output-glm" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
-                <p class="text-slate-500 italic">Waiting for prompt...</p>
+            <div id="res-glm" class="flex-1 overflow-y-auto p-4 custom-scrollbar markdown-content">
+                <p class="text-zinc-600 text-sm italic">Waiting for input...</p>
             </div>
         </section>
 
-        <!-- Kimi Card -->
-        <section class="glass rounded-2xl flex flex-col border-emerald-500/20 shadow-xl overflow-hidden group">
-            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
-                    <span class="text-xs font-bold uppercase text-slate-200">KIMI</span>
-                </div>
-                <div id="status-kimi" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
+        <!-- Model: KIMI -->
+        <section class="glass-panel rounded-2xl flex flex-col overflow-hidden">
+            <div class="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-xs font-bold text-emerald-400 tracking-wider uppercase">KIMI V1</h2>
+                <div id="loader-kimi" class="hidden"><div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div></div>
             </div>
-            <div id="output-kimi" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
-                <p class="text-slate-500 italic">Aapka prompt yahan dikhega...</p>
+            <div id="res-kimi" class="flex-1 overflow-y-auto p-4 custom-scrollbar markdown-content">
+                <p class="text-zinc-600 text-sm italic">Ready to compare...</p>
             </div>
         </section>
 
-        <!-- DeepSeek Card -->
-        <section class="glass rounded-2xl flex flex-col border-blue-500/20 shadow-xl overflow-hidden group">
-            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-                    <span class="text-xs font-bold uppercase text-slate-200">DeepSeek</span>
-                </div>
-                <div id="status-deepseek" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-blue-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-blue-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
+        <!-- Model: DeepSeek -->
+        <section class="glass-panel rounded-2xl flex flex-col overflow-hidden">
+            <div class="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-xs font-bold text-cyan-400 tracking-wider uppercase">DeepSeek-V3</h2>
+                <div id="loader-deepseek" class="hidden"><div class="w-2 h-2 bg-cyan-500 rounded-full animate-ping"></div></div>
             </div>
-            <div id="output-deepseek" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
-                <p class="text-slate-500 italic">Standing by...</p>
+            <div id="res-deepseek" class="flex-1 overflow-y-auto p-4 custom-scrollbar markdown-content">
+                <p class="text-zinc-600 text-sm italic">Standing by...</p>
             </div>
         </section>
 
-        <!-- Qwen Card -->
-        <section class="glass rounded-2xl flex flex-col border-violet-500/20 shadow-xl overflow-hidden group">
-            <div class="p-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-                    <span class="text-xs font-bold uppercase text-slate-200">Qwen</span>
-                </div>
-                <div id="status-qwen" class="hidden"><div class="flex gap-1"><span class="w-1.5 h-1.5 bg-violet-500 rounded-full loader-dot"></span><span class="w-1.5 h-1.5 bg-violet-500 rounded-full loader-dot" style="animation-delay: 0.2s"></span><span class="w-1.5 h-1.5 bg-violet-500 rounded-full loader-dot" style="animation-delay: 0.4s"></span></div></div>
+        <!-- Model: Qwen -->
+        <section class="glass-panel rounded-2xl flex flex-col overflow-hidden">
+            <div class="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-xs font-bold text-violet-400 tracking-wider uppercase">Qwen-Max</h2>
+                <div id="loader-qwen" class="hidden"><div class="w-2 h-2 bg-violet-500 rounded-full animate-ping"></div></div>
             </div>
-            <div id="output-qwen" class="flex-1 overflow-y-auto p-4 custom-scrollbar response-area text-sm">
-                <p class="text-slate-500 italic">Ready for analysis...</p>
+            <div id="res-qwen" class="flex-1 overflow-y-auto p-4 custom-scrollbar markdown-content">
+                <p class="text-zinc-600 text-sm italic">4 simultaneous responses...</p>
             </div>
         </section>
+
     </main>
 
-    <!-- Bottom Input -->
-    <div class="p-6 bg-gradient-to-t from-[#020617] via-[#020617]/90 to-transparent">
-        <div class="max-w-4xl mx-auto relative">
-            <form id="ai-form" class="relative group">
+    <!-- Chat Input Area -->
+    <footer class="p-4 md:p-6 bg-gradient-to-t from-black to-transparent">
+        <div class="max-w-4xl mx-auto">
+            <form id="chat-form" class="relative group">
                 <textarea 
-                    id="user-input"
+                    id="user-prompt"
                     rows="1"
-                    placeholder="Enter your query to compare 4 models simultaneously..."
-                    class="w-full bg-slate-900/80 border border-white/10 rounded-2xl py-5 pl-6 pr-16 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all resize-none shadow-2xl custom-scrollbar"
+                    placeholder="Ask all models anything... (Hinglish allowed)"
+                    class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 pl-6 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none shadow-2xl"
                 ></textarea>
                 <button 
                     type="submit"
-                    id="send-btn"
-                    class="absolute right-3 top-3 bottom-3 px-5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl transition-all font-medium flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed group-hover:scale-105 active:scale-95 shadow-lg shadow-cyan-600/20"
+                    id="submit-btn"
+                    class="absolute right-3 bottom-3 p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all disabled:opacity-30 disabled:grayscale"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                     </svg>
                 </button>
             </form>
-            <p class="text-[10px] text-center mt-3 text-slate-500 font-medium uppercase tracking-[0.2em]">Powered by Arsychat API Framework</p>
+            <p class="text-center text-[10px] text-zinc-500 mt-3 font-medium uppercase tracking-widest">
+                GLM • KIMI • DEEPSEEK • QWEN — Multitasking AI Interface
+            </p>
         </div>
-    </div>
+    </footer>
 
     <script>
-        const API_BASE = "https://arsychat-api.metaspace.workers.dev/api";
-        const ENDPOINTS = {
-            glm: `${API_BASE}/glm/v1/chat/completions`,
-            kimi: `${API_BASE}/kimi/v1/chat/completions`,
-            deepseek: `${API_BASE}/deepseek/v1/chat/completions`,
-            qwen: `${API_BASE}/qwen/v1/chat/completions`
-        };
+        const API_URL = "https://arsychat-api.metaspace.workers.dev/api";
+        const MODELS = ["glm", "kimi", "deepseek", "qwen"];
+        
+        const chatForm = document.getElementById('chat-form');
+        const userPrompt = document.getElementById('user-prompt');
+        const submitBtn = document.getElementById('submit-btn');
 
-        const form = document.getElementById('ai-form');
-        const input = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
-
-        // Auto-resize textarea
-        input.addEventListener('input', function() {
+        // Auto-expand textarea
+        userPrompt.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
 
-        // Main prompt handler
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const prompt = input.value.trim();
-            if (!prompt) return;
+        // Safe HTML escape for response (though marked helps)
+        function cleanResponse(text) {
+            if (typeof text !== 'string') return JSON.stringify(text);
+            return text;
+        }
 
-            // Prepare UI
-            input.value = '';
-            input.style.height = 'auto';
-            sendBtn.disabled = true;
-
-            const models = ['glm', 'kimi', 'deepseek', 'qwen'];
+        async function callApi(model, prompt) {
+            const outputEl = document.getElementById(`res-${model}`);
+            const loader = document.getElementById(`loader-${model}`);
             
-            models.forEach(id => {
-                document.getElementById(`status-${id}`).classList.remove('hidden');
-                document.getElementById(`output-${id}`).innerHTML = `<div class="animate-pulse flex space-y-3 flex-col">
-                    <div class="h-2 bg-white/10 rounded w-3/4"></div>
-                    <div class="h-2 bg-white/10 rounded"></div>
-                    <div class="h-2 bg-white/10 rounded w-5/6"></div>
-                </div>`;
-            });
-
-            // Parallel calls
-            models.forEach(modelId => {
-                fetchModel(modelId, prompt);
-            });
-        });
-
-        async function fetchModel(id, prompt) {
-            const outputDiv = document.getElementById(`output-${id}`);
-            const statusDiv = document.getElementById(`status-${id}`);
+            loader.classList.remove('hidden');
+            outputEl.innerHTML = `<div class="space-y-3 loading-skeleton">
+                <div class="h-3 bg-zinc-800 rounded w-3/4"></div>
+                <div class="h-3 bg-zinc-800 rounded w-full"></div>
+                <div class="h-3 bg-zinc-800 rounded w-5/6"></div>
+            </div>`;
 
             try {
-                const response = await fetch(`${ENDPOINTS[id]}?prompt=${encodeURIComponent(prompt)}`);
+                // Working with GET request as specified
+                const response = await fetch(`${API_URL}/${model}/v1/chat/completions?prompt=${encodeURIComponent(prompt)}`);
                 
-                if (!response.ok) throw new Error(`Status: ${response.status}`);
+                if (!response.ok) throw new Error(`Server Error: ${response.status}`);
                 
                 const data = await response.json();
                 
-                // Content Extraction (Handles multiple API response formats)
-                let text = "";
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    text = data.choices[0].message.content;
+                // Logic to extract content from typical AI API response structures
+                let content = "";
+                if (data.choices && data.choices[0]?.message?.content) {
+                    content = data.choices[0].message.content;
                 } else if (data.response) {
-                    text = data.response;
+                    content = data.response;
                 } else if (data.result) {
-                    text = data.result;
+                    content = data.result;
                 } else {
-                    text = typeof data === 'string' ? data : JSON.stringify(data);
+                    content = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
                 }
 
-                outputDiv.innerHTML = marked.parse(text);
-                
+                outputEl.innerHTML = marked.parse(cleanResponse(content));
+
             } catch (err) {
-                outputDiv.innerHTML = `<div class="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-red-400 text-xs">
-                    Failed to fetch response.<br>${err.message}
+                outputEl.innerHTML = `<div class="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
+                    ERROR: ${err.message}
                 </div>`;
             } finally {
-                statusDiv.classList.add('hidden');
-                checkAllFinished();
+                loader.classList.add('hidden');
             }
         }
 
-        function checkAllFinished() {
-            const allHidden = Array.from(document.querySelectorAll('[id^="status-"]'))
-                                   .every(el => el.classList.contains('hidden'));
-            if (allHidden) sendBtn.disabled = false;
-        }
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prompt = userPrompt.value.trim();
+            if (!prompt) return;
 
-        // Enter key to submit
-        input.addEventListener('keydown', (e) => {
+            // UI Reset
+            submitBtn.disabled = true;
+            userPrompt.value = '';
+            userPrompt.style.height = 'auto';
+
+            // Parallel Execution
+            const requests = MODELS.map(model => callApi(model, prompt));
+            
+            await Promise.allSettled(requests);
+            submitBtn.disabled = false;
+        });
+
+        // Shortcut: Enter to send
+        userPrompt.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                form.dispatchEvent(new Event('submit'));
+                chatForm.dispatchEvent(new Event('submit'));
             }
         });
 
-        // Initialize marked options
-        marked.setOptions({ gfm: true, breaks: true });
+        // Marked.js config
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
     </script>
 </body>
 </html>
